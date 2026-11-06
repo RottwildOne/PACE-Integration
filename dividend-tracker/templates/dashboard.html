@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not has_data %}
+  <div class="card"><h2>Welcome</h2>
+  <p>Start by <a href="{{ url_for('import_csv') }}">importing a Fidelity account history CSV</a>.</p></div>
+{% else %}
+<div class="kpis">
+  <div class="kpi"><span>Received, last 12 months</span><b>{{ ttm|usd }}</b></div>
+  <div class="kpi"><span>Received this year</span><b>{{ ytd|usd }}</b></div>
+  <div class="kpi"><span>Announced, not yet paid</span><b>{{ announced_total|usd }}</b></div>
+  <div class="kpi"><span>Projected next 12 months</span><b>{{ forward|usd }}</b>
+    <em>announced + estimated</em></div>
+</div>
+
+<div class="card">
+  <h2>Monthly income <small>last 12 received · next 12 projected</small></h2>
+  <div class="chart">
+  {% for h in hist %}
+    <div class="col" title="{{ h.month }}: {{ h.received|usd }} received">
+      <div class="bar received" style="height: {{ (h.received / peak * 100)|round(1) }}%"></div>
+      <span>{{ h.month[2:] }}</span></div>
+  {% endfor %}
+    <div class="divider"></div>
+  {% for p in proj %}
+    <div class="col" title="{{ p.month }}: {{ p.announced|usd }} announced, {{ p.estimated|usd }} estimated">
+      <div class="bar estimated" style="height: {{ (p.estimated / peak * 100)|round(1) }}%"></div>
+      <div class="bar announced" style="height: {{ (p.announced / peak * 100)|round(1) }}%"></div>
+      <span>{{ p.month[2:] }}</span></div>
+  {% endfor %}
+  </div>
+  <p class="legend"><i class="received"></i>Received <i class="announced"></i>Announced
+     <i class="estimated"></i>Estimated (same month last year)</p>
+  {% if span < 330 %}<p class="note">Your imported history covers only {{ span }} days, so
+    estimates for months without an announced dividend are incomplete. Import a longer history for better projections.</p>{% endif %}
+</div>
+
+<div class="card"><h2>Next announced payments</h2>
+{% if next_up %}
+<table><tr><th>Symbol</th><th>Pay date</th><th>Ex-date</th><th class="r">Per share</th><th class="r">Expected</th></tr>
+{% for u in next_up %}<tr><td>{{ u.symbol }}</td><td>{{ u.pay_date|longdate }}</td><td>{{ u.ex_date|longdate }}</td>
+<td class="r">{{ '%.4f'|format(u.amount) }}</td><td class="r">{{ u.expected|usd }}</td></tr>{% endfor %}
+</table>
+{% else %}<p class="muted">None found. Use “Refresh market data” to look up declared dividends.</p>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

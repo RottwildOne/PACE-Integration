@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card"><h2>Dividend log</h2>
+<form method="get" class="inline"><label>Symbol
+<select name="symbol" onchange="this.form.submit()"><option value="">All</option>
+{% for s in symbols %}<option {{ 'selected' if s == selected }}>{{ s }}</option>{% endfor %}</select></label></form>
+<table><tr><th>Date</th><th>Symbol</th><th>Description</th><th class="r">Amount</th></tr>
+{% for r in rows %}<tr><td>{{ r.run_date|longdate }}</td><td>{{ r.symbol }}</td><td>{{ r.description }}</td>
+<td class="r">{{ r.amount|usd }}</td></tr>
+{% else %}<tr><td colspan="4" class="muted">No dividends yet.</td></tr>{% endfor %}
+<tr class="total"><td colspan="3">Total</td><td class="r">{{ rows|sum(attribute='amount')|usd }}</td></tr>
+</table></div>
+{% endblock %}

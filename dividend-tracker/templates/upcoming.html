@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card"><h2>Announced dividends</h2>
+<p class="muted">Declared by the company, from Nasdaq's public dividend calendar. Expected cash uses your <i>current</i> share count
+(shares held on the ex-date decide actual eligibility).</p>
+<table><tr><th>Symbol</th><th>Ex-date</th><th>Pay date</th><th class="r">Per share</th><th class="r">Shares</th><th class="r">Expected</th></tr>
+{% for u in rows %}<tr><td>{{ u.symbol }}</td><td>{{ u.ex_date|longdate }}</td><td>{{ u.pay_date|longdate }}</td>
+<td class="r">{{ '%.4f'|format(u.amount) }}</td><td class="r">{{ u.shares|num }}</td><td class="r">{{ u.expected|usd }}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">None found. Use “Refresh market data”.</td></tr>{% endfor %}
+<tr class="total"><td colspan="5">Total</td><td class="r">{{ rows|sum(attribute='expected')|usd }}</td></tr></table></div>
+
+<div class="card"><h2>12-month projection</h2>
+<table><tr><th>Month</th><th>Detail</th><th class="r">Announced</th><th class="r">Estimated</th><th class="r">Total</th></tr>
+{% for p in proj %}<tr><td>{{ p.month }}</td>
+<td>{% for s, amt, kind in p.detail %}<span class="chip {{ kind }}" title="{{ kind }}">{{ s }} {{ amt|usd }}</span> {% endfor %}</td>
+<td class="r">{{ p.announced|usd }}</td><td class="r">{{ p.estimated|usd }}</td><td class="r">{{ (p.announced + p.estimated)|usd }}</td></tr>{% endfor %}
+<tr class="total"><td colspan="2">Total</td><td class="r">{{ proj|sum(attribute='announced')|usd }}</td>
+<td class="r">{{ proj|sum(attribute='estimated')|usd }}</td>
+<td class="r">{{ (proj|sum(attribute='announced') + proj|sum(attribute='estimated'))|usd }}</td></tr></table>
+<p class="note">Estimates repeat what each symbol paid in the same month a year earlier, so they need ≥12 months of imported history
+and ignore dividend changes and share-count changes.</p></div>
+{% endblock %}

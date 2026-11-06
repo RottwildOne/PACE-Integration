@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card"><h2>Import Fidelity history</h2>
+<p>In Fidelity: <b>Accounts &amp; Trade → Activity &amp; Orders → History → Download</b> (choose the longest date range).
+Re-importing overlapping files is safe — rows already present are skipped.</p>
+<form method="post" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".csv,text/csv" required>
+  <button>Import</button>
+</form>
+<p class="muted">Recognised: dividends received, reinvestments, buys, sells. Other rows (interest, transfers, etc.) are ignored.
+Files stay on this machine.</p></div>
+{% endblock %}

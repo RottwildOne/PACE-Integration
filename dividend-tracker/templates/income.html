@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid3">
+<div class="card"><h2>By year</h2><table>
+{% for y, v in years.items() %}<tr><td>{{ y }}</td><td class="r">{{ v|usd }}</td></tr>{% else %}<tr><td class="muted">No data</td></tr>{% endfor %}
+</table></div>
+<div class="card"><h2>By month</h2><table>
+{% for m, v in months %}<tr><td>{{ m }}</td><td class="r">{{ v|usd }}</td></tr>{% else %}<tr><td class="muted">No data</td></tr>{% endfor %}
+</table></div>
+<div class="card"><h2>By symbol</h2><table><tr><th></th><th class="r">All time</th><th class="r">Last 12 mo</th></tr>
+{% for s, v in by_symbol.items() %}<tr><td>{{ s }}</td><td class="r">{{ v|usd }}</td><td class="r">{{ ttm.get(s, 0)|usd }}</td></tr>
+{% else %}<tr><td class="muted">No data</td></tr>{% endfor %}
+</table></div>
+</div>
+{% if span %}<p class="note">History covers {{ span }} days; totals reflect only what has been imported.</p>{% endif %}
+{% endblock %}

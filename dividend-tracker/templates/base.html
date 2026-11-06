@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Dividend Tracker{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <a class="brand" href="{{ url_for('dashboard') }}">Dividend Tracker</a>
+  <nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('dividend_log') }}">Dividends</a>
+    <a href="{{ url_for('income') }}">Income</a>
+    <a href="{{ url_for('upcoming') }}">Upcoming</a>
+    <a href="{{ url_for('holdings') }}">Holdings</a>
+    <a href="{{ url_for('import_csv') }}">Import</a>
+  </nav>
+  <form method="post" action="{{ url_for('refresh') }}">
+    <button title="Fetch announced dividends and prices">Refresh market data</button>
+    <small>{% if last_refresh %}updated {{ last_refresh }}{% else %}not fetched yet{% endif %}</small>
+  </form>
+</header>
+<main>
+{% for cat, msg in get_flashed_messages(with_categories=true) %}
+  <div class="flash {{ cat }}">{{ msg }}</div>
+{% endfor %}
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>
