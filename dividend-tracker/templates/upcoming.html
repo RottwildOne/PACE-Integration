@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card"><h2>Announced dividends</h2>
-<p class="muted">Declared by the company, from Nasdaq's public dividend calendar. Expected cash uses your <i>current</i> share count
+<p class="muted">Declared by the company, from Nasdaq's public dividend calendar plus Yahoo Finance for ex-dividend dates Nasdaq lacks (their pay dates are estimated, marked “est.”). Expected cash uses your <i>current</i> share count
 (shares held on the ex-date decide actual eligibility).</p>
 <table><tr><th>Symbol</th><th>Ex-date</th><th>Pay date</th><th class="r">Per share</th><th class="r">Shares</th><th class="r">Expected</th></tr>
-{% for u in rows %}<tr><td>{{ u.symbol }}</td><td>{{ u.ex_date|longdate }}</td><td>{{ u.pay_date|longdate }}</td>
+{% for u in rows %}<tr><td>{{ u.symbol }}</td><td>{{ u.ex_date|longdate }}</td><td>{{ u.pay_date|longdate }}{{ " (est.)" if u.pay_estimated }}</td>
 <td class="r">{{ '%.4f'|format(u.amount) }}</td><td class="r">{{ u.shares|num }}</td><td class="r">{{ u.expected|usd }}</td></tr>
 {% else %}<tr><td colspan="6" class="muted">None found. Use “Refresh market data”.</td></tr>{% endfor %}
 <tr class="total"><td colspan="5">Total</td><td class="r">{{ rows|sum(attribute='expected')|usd }}</td></tr></table></div>

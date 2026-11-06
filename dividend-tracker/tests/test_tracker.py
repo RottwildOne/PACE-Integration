@@ -53,7 +53,7 @@ def test_income_summaries(conn):
     assert analytics.ttm_by_symbol(conn, TODAY)["O"] == pytest.approx(4.46)  # 2025-11-15 is inside 365 days
 
 
-def fake_get_factory(rows_by_day):
+def fake_get_factory(rows_by_day, yahoo_divs=None):
     class Resp:
         def __init__(self, payload): self.payload = payload
         def raise_for_status(self): pass
@@ -63,6 +63,11 @@ def fake_get_factory(rows_by_day):
         if "nasdaq" in url:
             rows = rows_by_day.get(params["date"], [])
             return Resp({"data": {"calendar": {"rows": rows}}})
+        if params and params.get("events") == "div":
+            import calendar
+            evs = {str(i): {"date": calendar.timegm(date.fromisoformat(d).timetuple()) + 50000, "amount": a}
+                   for i, (d, a) in enumerate((yahoo_divs or {}).get(url.rsplit("/", 1)[1], []))}
+            return Resp({"chart": {"result": [{"events": {"dividends": evs}}]}})
         return Resp({"chart": {"result": [{"meta": {"regularMarketPrice": 50.0}}]}})
     return fake_get
 
@@ -133,3 +138,25 @@ def test_month_format_is_mm_yyyy(tmp_path):
     assert "11-2026" in up and "2026-11" not in up
     dash = c.get("/").get_data(as_text=True)
     assert "11-2026" in dash and "2026-11" not in dash
+
+
+def test_yahoo_fallback_adds_unpaid_ex_dividend_with_estimated_pay_date(conn):
+    # O: paid 10/15 for an earlier ex-date (10/01, lag 14d); new ex-date 10/30 not yet received
+    yahoo = {"O": [("2026-10-01", 0.27), ("2026-10-30", 0.272)], "JEPQ": []}
+    res = market.refresh_announced(conn, ["O", "JEPQ"], today=TODAY,
+                                   get=fake_get_factory({}, yahoo))
+    assert res["from_yahoo"] == 1
+    row = conn.execute("SELECT * FROM announced").fetchone()
+    assert (row["symbol"], row["ex_date"], row["amount"], row["pay_estimated"]) == ("O", "2026-10-30", 0.272, 1)
+    assert row["pay_date"] == "2026-11-13"  # ex + 14 day lag
+    up = analytics.upcoming_announced(conn, TODAY)
+    assert up[0]["expected"] == pytest.approx(0.272 * 10.04)
+
+
+def test_yahoo_skips_dividends_already_received_or_covered_by_nasdaq(conn):
+    yahoo = {"O": [("2026-10-01", 0.27), ("2026-11-02", 0.27)]}  # both <= already received 10/15? 11/02 > 10/15
+    cal = {"2026-11-02": [{"symbol": "O", "dividend_Ex_Date": "11/02/2026", "payment_Date": "11/16/2026",
+                           "dividend_Rate": 0.27}]}
+    market.refresh_announced(conn, ["O"], today=TODAY, get=fake_get_factory(cal, yahoo))
+    rows = conn.execute("SELECT source FROM announced").fetchall()
+    assert [r["source"] for r in rows] == ["nasdaq"]  # yahoo duplicate suppressed

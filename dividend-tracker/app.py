@@ -133,6 +133,8 @@ def create_app(db_path=None, today_fn=date.today, http_get=None):
         p = market.refresh_prices(conn, symbols, **get_kwargs)
         db.set_meta(conn, "announced_refreshed", today.isoformat())
         msg = f"Found {a['stored']} announced dividends; updated {p['updated']} prices."
+        if a.get("from_yahoo"):
+            msg += f" ({a['from_yahoo']} from Yahoo, with estimated pay dates.)"
         if a["days_failed"]:
             msg += f" {a['days_failed']}/{a['days_total']} calendar lookups failed — try again."
         if p["failed"]:

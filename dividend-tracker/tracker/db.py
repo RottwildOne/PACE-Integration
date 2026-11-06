@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS announced (
     record_date TEXT,
     announce_date TEXT,
     amount REAL NOT NULL,            -- per share
+    source TEXT NOT NULL DEFAULT 'nasdaq',   -- nasdaq | yahoo
+    pay_estimated INTEGER NOT NULL DEFAULT 0, -- 1 when pay_date is a guess
     PRIMARY KEY (symbol, ex_date)
 );
 
@@ -51,7 +53,18 @@ def connect(path):
     conn = sqlite3.connect(str(path), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    _migrate(conn)
     return conn
+
+
+def _migrate(conn):
+    """Add columns introduced after the first release to existing databases."""
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(announced)")}
+    if "source" not in cols:
+        conn.execute("ALTER TABLE announced ADD COLUMN source TEXT NOT NULL DEFAULT 'nasdaq'")
+    if "pay_estimated" not in cols:
+        conn.execute("ALTER TABLE announced ADD COLUMN pay_estimated INTEGER NOT NULL DEFAULT 0")
+    conn.commit()
 
 
 def set_meta(conn, key, value):

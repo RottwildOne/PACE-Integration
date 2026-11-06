@@ -20,7 +20,8 @@ the public market-data lookups below.
 1. **Import** a Fidelity history CSV (Activity & Orders → History → Download). Re-importing overlapping
    files is safe. Recognised rows: dividends received, reinvestments, buys, sells.
 2. **Refresh market data** (header button). This fetches:
-   - *Announced dividends* from Nasdaq's public dividend calendar (ex-date, pay date, per-share amount)
+   - *Announced dividends* from Nasdaq's public dividend calendar (ex-date, pay date, per-share amount), plus
+     Yahoo Finance ex-dividend events not yet seen in your history (pay date estimated, marked "est.")
      for the symbols you've received dividends from; scans ~45 days back to 75 days ahead (takes under a minute).
    - *Prices* from Yahoo Finance's public chart endpoint, for yield.
 3. Views: dashboard, dividend log, income (year/month/symbol), upcoming + 12-month projection, holdings & yield.

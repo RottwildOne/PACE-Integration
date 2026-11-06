@@ -37,7 +37,7 @@
 <div class="card"><h2>Next announced payments</h2>
 {% if next_up %}
 <table><tr><th>Symbol</th><th>Pay date</th><th>Ex-date</th><th class="r">Per share</th><th class="r">Expected</th></tr>
-{% for u in next_up %}<tr><td>{{ u.symbol }}</td><td>{{ u.pay_date|longdate }}</td><td>{{ u.ex_date|longdate }}</td>
+{% for u in next_up %}<tr><td>{{ u.symbol }}</td><td>{{ u.pay_date|longdate }}{{ " (est.)" if u.pay_estimated }}</td><td>{{ u.ex_date|longdate }}</td>
 <td class="r">{{ '%.4f'|format(u.amount) }}</td><td class="r">{{ u.expected|usd }}</td></tr>{% endfor %}
 </table>
 {% else %}<p class="muted">None found. Use “Refresh market data” to look up declared dividends.</p>{% endif %}
