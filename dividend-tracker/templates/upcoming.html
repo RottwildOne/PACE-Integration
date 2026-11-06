@@ -11,7 +11,7 @@
 
 <div class="card"><h2>12-month projection</h2>
 <table><tr><th>Month</th><th>Detail</th><th class="r">Announced</th><th class="r">Estimated</th><th class="r">Total</th></tr>
-{% for p in proj %}<tr><td>{{ p.month }}</td>
+{% for p in proj %}<tr><td>{{ p.month|monthfmt }}</td>
 <td>{% for s, amt, kind in p.detail %}<span class="chip {{ kind }}" title="{{ kind }}">{{ s }} {{ amt|usd }}</span> {% endfor %}</td>
 <td class="r">{{ p.announced|usd }}</td><td class="r">{{ p.estimated|usd }}</td><td class="r">{{ (p.announced + p.estimated)|usd }}</td></tr>{% endfor %}
 <tr class="total"><td colspan="2">Total</td><td class="r">{{ proj|sum(attribute='announced')|usd }}</td>

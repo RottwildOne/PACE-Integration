@@ -22,6 +22,11 @@ def create_app(db_path=None, today_fn=date.today, http_get=None):
     def num(v):
         return f"{v:,.3f}".rstrip("0").rstrip(".")
 
+    @app.template_filter("monthfmt")
+    def monthfmt(s):
+        """'2026-11' -> '11-2026'"""
+        return f"{s[5:7]}-{s[:4]}" if s and len(s) >= 7 else s
+
     @app.template_filter("longdate")
     def longdate(s):
         return date.fromisoformat(s).strftime("%b %d, %Y") if s else "–"

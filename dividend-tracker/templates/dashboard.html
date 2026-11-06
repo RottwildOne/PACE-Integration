@@ -16,16 +16,16 @@
   <h2>Monthly income <small>last 12 received · next 12 projected</small></h2>
   <div class="chart">
   {% for h in hist %}
-    <div class="col" title="{{ h.month }}: {{ h.received|usd }} received">
+    <div class="col" title="{{ h.month|monthfmt }}: {{ h.received|usd }} received">
       <div class="bar received" style="height: {{ (h.received / peak * 100)|round(1) }}%"></div>
-      <span>{{ h.month[2:] }}</span></div>
+      <span>{{ h.month|monthfmt }}</span></div>
   {% endfor %}
     <div class="divider"></div>
   {% for p in proj %}
-    <div class="col" title="{{ p.month }}: {{ p.announced|usd }} announced, {{ p.estimated|usd }} estimated">
+    <div class="col" title="{{ p.month|monthfmt }}: {{ p.announced|usd }} announced, {{ p.estimated|usd }} estimated">
       <div class="bar estimated" style="height: {{ (p.estimated / peak * 100)|round(1) }}%"></div>
       <div class="bar announced" style="height: {{ (p.announced / peak * 100)|round(1) }}%"></div>
-      <span>{{ p.month[2:] }}</span></div>
+      <span>{{ p.month|monthfmt }}</span></div>
   {% endfor %}
   </div>
   <p class="legend"><i class="received"></i>Received <i class="announced"></i>Announced

@@ -120,3 +120,16 @@ def test_web_flow(tmp_path):
     assert b"$27.00" in c.get("/upcoming").data
     assert b"Shares must be a number" in c.post("/holdings/O", data={"shares": "abc"},
                                                 follow_redirects=True).data
+
+
+def test_month_format_is_mm_yyyy(tmp_path):
+    import io
+    app = create_app(db_path=tmp_path / "m.db", today_fn=lambda: TODAY, http_get=fake_get_factory({}))
+    c = app.test_client()
+    c.post("/import", data={"file": (io.BytesIO(FIXTURE.encode()), "h.csv")})
+    inc = c.get("/income").get_data(as_text=True)
+    assert "11-2026" in inc and "2026-11" not in inc
+    up = c.get("/upcoming").get_data(as_text=True)
+    assert "11-2026" in up and "2026-11" not in up
+    dash = c.get("/").get_data(as_text=True)
+    assert "11-2026" in dash and "2026-11" not in dash
